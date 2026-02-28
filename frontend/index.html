@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mouse Tracker</title>
+</head>
+<body>
+    <script lang="js">
+
+        let ws = new WebSocket("ws://localhost:3000/ws");
+        let isConnected = false;
+
+        const connect = () => {
+            ws.onopen = () => {
+                console.log("Соединение установленно");
+                isConnected = true;
+            };
+
+            ws.onclose = () => {
+                console.log("Соединение закрыто");
+                setTimeout(connect, 2000);
+            }
+
+            ws.onerror = (error) => {
+                console.error("Ошибка! ", error);
+            }
+        }
+
+        connect();
+
+        class Cords {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+            }
+        };
+
+        document.addEventListener('mousemove', (event) => {
+            if(isConnected && ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify(new Cords(event.clientX, event.clientY)));
+            }
+        });
+    </script>    
+</body>
+</html>
